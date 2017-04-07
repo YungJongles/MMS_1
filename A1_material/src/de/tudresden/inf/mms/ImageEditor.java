@@ -1,10 +1,15 @@
+
 package de.tudresden.inf.mms;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 /**
- * @author <Vorname> <Name>, <Matrikelnummer>
+ * @author <Dominic> <Sehring>, <4050898>
  * 
  */
 public class ImageEditor {
@@ -60,6 +65,17 @@ public class ImageEditor {
 		/*
 		 * ToDo
 		 */
+		int[] rgb;
+		
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+            	rgb = ImageHelper.toRGBArray(image.getRGB(x, y));
+            	rgb[0] = 255 - rgb[0];
+            	rgb[1] = 255 - rgb[1];
+            	rgb[2] = 255 - rgb[2];
+                tmpImg.setRGB(x, y, ImageHelper.toIntRGB(rgb));
+            }
+        }
 
 		return tmpImg;
 	}
@@ -73,8 +89,16 @@ public class ImageEditor {
 		/*
 		 * ToDo
 		 */
-
-		return tmpImg;
+		AffineTransform atrans = new AffineTransform();
+		atrans.translate(image.getWidth() / 2, image.getHeight() / 2);
+		atrans.rotate(Math.PI);
+		atrans.translate(-image.getWidth()/2, -image.getHeight()/2);
+        
+		Graphics2D g2d = tmpImg.createGraphics();
+		g2d.drawImage(image, atrans, null);
+        
+        
+        return tmpImg;
 	}
 
 	/**
@@ -86,8 +110,26 @@ public class ImageEditor {
 		/*
 		 * ToDo
 		 */
-
-		return tmpImg;
+		int[] rgb;
+		
+		for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+            	
+            	rgb = ImageHelper.toRGBArray(image.getRGB(x, y));
+            	
+            	double yy = (0.299 * rgb[0]) + (0.587 * rgb[1]) + (0.114 * rgb[2]);
+            	double cb = 128 - (0.168736 * rgb[0]) - (0.331264*rgb[1]) + (0.5 * rgb[2]);
+            	double cr = 128 + (0.5 * rgb[0]) - (0.418688 * rgb[1]) - (0.081312 * rgb[2]);
+            	
+            	rgb[0] = (int)Math.floor(yy + 1.402 * (cr - 128));
+            	rgb[1] = (int)Math.floor(yy - 0.34414 * (cb - 128) - 0.71414 * (cr - 128));
+            	rgb[2] = (int)Math.floor(yy + 1.772 * (cb - 128)); 
+            	
+            	tmpImg.setRGB(x, y, ImageHelper.toIntRGB(rgb));
+            } 
+		}
+		return tmpImg; 
+		
 	}
 	
 	/**
